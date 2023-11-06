@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test Client</title>
+    <style>
+        #logs {
+            border: 1px solid black;
+            height: 200px;
+            overflow: auto;
+        }
+        #logs p {
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+
+<button id="connectBtn">Connect</button>
+<button id="sendBtn" disabled>Send Data</button>
+<div id="logs"></div>
+
+<script>
+    let socket;
+
+    document.getElementById("connectBtn").addEventListener("click", function() {
+        // Create a new WebSocket
+        log("Attempting to connect..."); // <-- This is the new log line
+        
+        socket = new WebSocket("ws://192.168.178.104:8766");
+
+        socket.onopen = function(event) {
+            log("Connected to the server");
+            document.getElementById("sendBtn").disabled = false;
+        };
+
+        socket.onclose = function(event) {
+            if (event.wasClean) {
+                log(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
+            } else {
+                log('Connection died');
+            }
+        };
+
+        socket.onmessage = function(event) {
+            log("Data received: " + event.data);
+        };
+
+        socket.onerror = function(error) {
+            log("Error: " + error.message);
+        };
+    });
+
+    document.getElementById("sendBtn").addEventListener("click", function() {
+        socket.send("Test data from client");
+        log("Sent data to the server");
+    });
+
+    function log(message) {
+        const logsDiv = document.getElementById("logs");
+        const p = document.createElement("p");
+        p.textContent = message;
+        logsDiv.appendChild(p);
+    }
+</script>
+</body>
+</html>
